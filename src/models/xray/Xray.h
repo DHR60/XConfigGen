@@ -1,0 +1,519 @@
+#pragma once
+
+#include <QSerializer>
+
+class Log4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
+    QS_FIELD_OPT(QString, access)
+    QS_FIELD_OPT(QString, error)
+    QS_FIELD_OPT(QString, loglevel)
+};
+
+// inbounds
+
+class Sniffing4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(bool, enabled)
+    QS_COLLECTION(QList, QString, destOverride)
+    QS_FIELD(bool, routeOnly)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY(destOverride)
+};
+
+class UsersItem4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
+    QS_FIELD_OPT(QString, id)
+    QS_FIELD_OPT(int, alterId)
+    QS_FIELD_OPT(QString, email)
+    QS_FIELD_OPT(QString, security)
+    QS_FIELD_OPT(QString, encryption)
+    QS_FIELD_OPT(QString, flow)
+};
+
+class AccountsItem4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(QString, user)
+    QS_FIELD(QString, pass)
+};
+
+class InboundSettings4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
+    QS_FIELD_OPT(QString, auth)
+    QS_FIELD_OPT(bool, udp)
+    QS_FIELD_OPT(QString, ip)
+    QS_FIELD_OPT(QString, address)
+    QS_COLLECTION_OBJECTS(QList, UsersItem4Ray, clients)
+    QS_FIELD_OPT(QString, decryption)
+    QS_FIELD_OPT(bool, allowTransparent)
+    QS_COLLECTION_OBJECTS(QList, AccountsItem4Ray, accounts)
+};
+
+class Inbounds4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(QString, tag)
+    QS_FIELD(int, port)
+    QS_FIELD(QString, listen)
+    QS_FIELD(QString, protocol)
+    QS_OBJECT(Sniffing4Ray, sniffing)
+    QS_OBJECT(InboundSettings4Ray, settings)
+};
+
+// StreamSettings
+
+class TlsSettings4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD_OPT(bool, allowInsecure)
+    QS_FIELD_OPT(QString, serverName)
+    QS_COLLECTION(QList, QString, alpn)
+    QS_FIELD_OPT(QString, fingerprint)
+    QS_FIELD_OPT(bool, show)
+    QS_FIELD_OPT(QString, publicKey)
+    QS_FIELD_OPT(QString, shortId)
+    QS_FIELD_OPT(QString, spiderX)
+    QS_INTERNAL_MEMBER_SKIP_NULL(allowInsecure)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(serverName)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY(alpn)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(fingerprint)
+    QS_INTERNAL_MEMBER_SKIP_NULL(show)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(publicKey)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(shortId)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(spiderX)
+};
+
+class Header4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(QString, type)
+    QS_FIELD(QString, request)
+    QS_FIELD(QString, response)
+    QS_FIELD_OPT(QString, domain)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(domain)
+};
+
+class TcpSettings4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_OBJECT(Header4Ray, header)
+};
+
+class KcpSettings4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
+    QS_FIELD_OPT(int, mtu)
+    QS_FIELD_OPT(int, tti)
+    QS_FIELD_OPT(int, uplinkCapacity)
+    QS_FIELD_OPT(int, downlinkCapacity)
+    QS_FIELD_OPT(bool, congestion)
+    QS_FIELD_OPT(int, readBufferSize)
+    QS_FIELD_OPT(int, writeBufferSize)
+    QS_OBJECT_OPT(Header4Ray, header)
+    QS_FIELD_OPT(QString, seed)
+};
+
+class WsSettings4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD_OPT(QString, path)
+    QS_FIELD_OPT(QString, host)
+    // 仅客户端，自定义 HTTP 头，一个键值对，每个键表示一个 HTTP 头的名称，对应的值是字符串。
+    // v2rayN 使用 Headers4Ray { Host; UserAgent}
+    QS_QT_DICT(QMap, QString, QString, headers)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(path)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(host)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY(headers)
+};
+
+class HttpUpgradeSettings4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
+    QS_FIELD_OPT(QString, path)
+    QS_FIELD_OPT(QString, host)
+};
+
+class XhttpSettings4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
+    QS_FIELD_OPT(QString, path)
+    QS_FIELD_OPT(QString, host)
+    QS_FIELD_OPT(QString, mode)
+
+public:
+    QJsonObject extra;
+    QJsonObject toJson() const override
+    {
+        auto json = this->QSerializer::toJson();
+        json.insert("extra", extra);
+        return json;
+    }
+};
+
+class HttpSettings4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
+    QS_FIELD_OPT(QString, path)
+    QS_COLLECTION(QList, QString, host)
+};
+
+class QuicSettings4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
+    QS_FIELD_OPT(QString, authority)
+    QS_FIELD_OPT(QString, serviceName)
+    QS_FIELD(bool, multiMode)
+    QS_FIELD_OPT(int, idle_timeout)
+    QS_FIELD_OPT(int, health_check_timeout)
+    QS_FIELD_OPT(bool, permit_without_stream)
+    QS_FIELD_OPT(int, initial_windows_size)
+};
+
+class GrpcSettings4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(QString, serviceName)
+    QS_FIELD(QString, multiMode)
+};
+
+class Sockopt4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
+    QS_FIELD_OPT(QString, dialerProxy)
+};
+
+class StreamSettings4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
+    QS_FIELD_OPT(QString, network)
+    QS_FIELD_OPT(QString, security)
+    QS_OBJECT_OPT(TlsSettings4Ray, tlsSettings)
+    QS_OBJECT_OPT(TcpSettings4Ray, tcpSettings)
+    QS_OBJECT_OPT(KcpSettings4Ray, kcpSettings)
+    QS_OBJECT_OPT(WsSettings4Ray, wsSettings)
+    QS_OBJECT_OPT(HttpUpgradeSettings4Ray, httpupgradeSettings)
+    QS_OBJECT_OPT(XhttpSettings4Ray, xhttpSettings)
+    QS_OBJECT_OPT(HttpSettings4Ray, httpSettings)
+    QS_OBJECT_OPT(QuicSettings4Ray, quicSettings)
+    QS_OBJECT_OPT(GrpcSettings4Ray, grpcSettings)
+    QS_OBJECT_OPT(TlsSettings4Ray, realitySettings)
+    QS_OBJECT_OPT(Sockopt4Ray, sockopt)
+};
+
+// outbounds
+
+class VnextItem4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(QString, address)
+    QS_FIELD(int, port)
+    QS_COLLECTION_OBJECTS(QList, UsersItem4Ray, users)
+};
+
+class SocksUsersItem4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(QString, user)
+    QS_FIELD(QString, pass)
+    QS_FIELD_OPT(int, level)
+    QS_INTERNAL_MEMBER_SKIP_NULL(level)
+};
+
+class ServersItem4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(QString, email)
+    QS_FIELD(QString, address)
+    QS_FIELD_OPT(QString, method)
+    QS_FIELD_OPT(bool, ota)
+    QS_FIELD_OPT(QString, password)
+    QS_FIELD(int, port)
+    QS_FIELD_OPT(int, level)
+    QS_FIELD(QString, flow)
+    QS_COLLECTION_OBJECTS(QList, SocksUsersItem4Ray, users)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(method)
+    QS_INTERNAL_MEMBER_SKIP_NULL(ota)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(password)
+    QS_INTERNAL_MEMBER_SKIP_NULL(level)
+};
+
+class Mux4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(bool, enabled)
+    QS_FIELD_OPT(int, concurrency)
+    QS_FIELD_OPT(int, xudpConcurrency)
+    QS_FIELD_OPT(QString, xudpProxyUDP443)
+    QS_INTERNAL_MEMBER_SKIP_NULL(concurrency)
+    QS_INTERNAL_MEMBER_SKIP_NULL(xudpConcurrency)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(xudpProxyUDP443)
+};
+
+class Response4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(QString, type)
+};
+
+class FragmentItem4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
+    QS_FIELD_OPT(QString, packets)
+    QS_FIELD_OPT(QString, length)
+    QS_FIELD_OPT(QString, interval)
+};
+
+class OutboundSettings4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_COLLECTION_OBJECTS(QList, VnextItem4Ray, vnext)
+    QS_COLLECTION_OBJECTS(QList, ServersItem4Ray, servers)
+    QS_OBJECT_OPT(Response4Ray, response)
+    QS_FIELD_OPT(QString, domainStrategy)
+    QS_FIELD_OPT(int, userLevel)
+    QS_COLLECTION_OBJECTS(QList, FragmentItem4Ray, fragment)
+
+    QS_INTERNAL_MEMBER_SKIP_EMPTY(vnext)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY(servers)
+    QS_INTERNAL_MEMBER_SKIP_NULL(response)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(domainStrategy)
+    QS_INTERNAL_MEMBER_SKIP_NULL(userLevel)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY(fragment)
+};
+
+class Outbounds4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(QString, tag)
+    QS_FIELD(QString, protocol)
+    QS_OBJECT_OPT(OutboundSettings4Ray, settings)
+    QS_OBJECT_OPT(StreamSettings4Ray, streamSettings)
+    QS_OBJECT_OPT(Mux4Ray, mux)
+    QS_INTERNAL_MEMBER_SKIP_NULL(settings)
+    QS_INTERNAL_MEMBER_SKIP_NULL(streamSettings)
+    QS_INTERNAL_MEMBER_SKIP_NULL(mux)
+};
+
+// dns
+
+class DnsServers4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(QString, address)
+    QS_FIELD_OPT(int, port)
+    QS_COLLECTION(QList, QString, domains)
+    QS_COLLECTION(QList, QString, expectIPs)
+    QS_FIELD_OPT(bool, skipFallback)
+    QS_FIELD_OPT(QString, clientIP)
+    QS_FIELD_OPT(QString, queryStrategy)
+    QS_INTERNAL_MEMBER_SKIP_NULL(port)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY(domains)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY(expectIPs)
+    QS_INTERNAL_MEMBER_SKIP_NULL(skipFallback)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(clientIP)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(queryStrategy)
+};
+
+class Dns4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD_OPT(QString, clientIP)
+    QS_FIELD_OPT(QString, queryStrategy)
+    QS_FIELD_OPT(bool, disableCache)
+    QS_FIELD_OPT(bool, disableFallback)
+    QS_FIELD_OPT(bool, disableFallbackIfMatch)
+    QS_FIELD_OPT(QString, tag)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(clientIP)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(queryStrategy)
+    QS_INTERNAL_MEMBER_SKIP_NULL(disableCache)
+    QS_INTERNAL_MEMBER_SKIP_NULL(disableFallback)
+    QS_INTERNAL_MEMBER_SKIP_NULL(disableFallbackIfMatch)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(tag)
+
+public:
+    QMap<QString, QVariant> hosts;
+    QList<QVariant> servers;
+    QJsonObject toJson() const override
+    {
+        QJsonObject hostsObject;
+        for (auto it = hosts.begin(); it != hosts.end(); ++it)
+        {
+            if (it.value().metaType().id() == QMetaType::QStringList)
+            {
+                QJsonArray arr;
+                for (auto &item : it.value().toStringList())
+                {
+                    arr.append(item);
+                }
+                hostsObject.insert(it.key(), arr);
+            }
+            else
+            {
+                hostsObject.insert(it.key(), it.value().toString());
+            }
+        }
+        QJsonArray serversArray;
+        for (const auto &it : servers)
+        {
+            if (it.canConvert<DnsServers4Ray>())
+            {
+                serversArray.append(it.value<DnsServers4Ray>().toJson());
+            }
+            else
+            {
+                serversArray.append(it.toString());
+            }
+        }
+        auto json = this->QSerializer::toJson();
+        json.insert("hosts", hostsObject);
+        json.insert("servers", serversArray);
+        return json;
+    }
+};
+
+// routing
+
+class RulesItem4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD_OPT(QString, type)
+    QS_FIELD_OPT(QString, port)
+    QS_FIELD_OPT(QString, network)
+    QS_COLLECTION(QList, QString, inboundTag)
+    QS_FIELD_OPT(QString, outboundTag)
+    QS_FIELD_OPT(QString, balancerTag)
+    QS_COLLECTION(QList, QString, ip)
+    QS_COLLECTION(QList, QString, domain)
+    QS_COLLECTION(QList, QString, protocol)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(type)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(port)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(network)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY(inboundTag)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(outboundTag)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(balancerTag)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY(ip)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY(domain)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY(protocol)
+};
+
+class BalancersStrategy4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD_OPT(QString, type)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(type)
+};
+
+class BalancersItem4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_COLLECTION(QList, QString, selector)
+    QS_OBJECT_OPT(BalancersStrategy4Ray, strategy)
+    QS_FIELD_OPT(QString, tag)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY(selector)
+    QS_INTERNAL_MEMBER_SKIP_NULL(strategy)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(tag)
+};
+
+class Routing4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(QString, domainStrategy)
+    QS_FIELD_OPT(QString, domainMatcher)
+    QS_COLLECTION_OBJECTS(QList, RulesItem4Ray, rules)
+    QS_COLLECTION_OBJECTS(QList, BalancersItem4Ray, balancers)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(domainMatcher)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY(balancers)
+};
+
+class SystemPolicy4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(bool, statsOutboundUplink)
+    QS_FIELD(bool, statsOutboundDownlink)
+};
+
+class Policy4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_OBJECT(SystemPolicy4Ray, system)
+};
+
+class Metrics4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(QString, tag)
+};
+
+class Stats4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+};
+
+class XrayConfig : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_OBJECT(Log4Ray, log)
+    QS_OBJECT(Dns4Ray, dns)
+    QS_COLLECTION_OBJECTS(QList, Inbounds4Ray, inbounds)
+    QS_COLLECTION_OBJECTS(QList, Outbounds4Ray, outbounds)
+    QS_OBJECT(Routing4Ray, routing)
+    QS_OBJECT_OPT(Metrics4Ray, metrics)
+    QS_OBJECT_OPT(Policy4Ray, policy)
+    QS_OBJECT_OPT(Stats4Ray, stats)
+    QS_FIELD_OPT(QString, remarks)
+    QS_INTERNAL_MEMBER_SKIP_NULL(metrics)
+    QS_INTERNAL_MEMBER_SKIP_NULL(policy)
+    QS_INTERNAL_MEMBER_SKIP_NULL(stats)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(remarks)
+};

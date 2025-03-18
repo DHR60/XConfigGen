@@ -1,0 +1,3 @@
+[submodule "3rd/QSerializer"]
+	path = 3rd/QSerializer
+	url = https://github.com/DHR60/QSerializer
