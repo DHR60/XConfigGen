@@ -180,6 +180,16 @@ class QuicSettings4Ray : public QSerializer
     Q_GADGET
     QS_SERIALIZABLE
     QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
+    QS_FIELD_OPT(QString, security)
+    QS_FIELD_OPT(QString, key)
+    QS_OBJECT_OPT(Header4Ray, header)
+};
+
+class GrpcSettings4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
     QS_FIELD_OPT(QString, authority)
     QS_FIELD_OPT(QString, serviceName)
     QS_FIELD(bool, multiMode)
@@ -187,14 +197,6 @@ class QuicSettings4Ray : public QSerializer
     QS_FIELD_OPT(int, health_check_timeout)
     QS_FIELD_OPT(bool, permit_without_stream)
     QS_FIELD_OPT(int, initial_windows_size)
-};
-
-class GrpcSettings4Ray : public QSerializer
-{
-    Q_GADGET
-    QS_SERIALIZABLE
-    QS_FIELD(QString, serviceName)
-    QS_FIELD(QString, multiMode)
 };
 
 class Sockopt4Ray : public QSerializer
