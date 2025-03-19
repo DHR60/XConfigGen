@@ -78,7 +78,9 @@ class TlsSettings4Ray : public QSerializer
 {
     Q_GADGET
     QS_SERIALIZABLE
+    QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
     QS_FIELD_OPT(bool, allowInsecure)
+    QS_FIELD_OPT(bool, disableSystemRoot)
     QS_FIELD_OPT(QString, serverName)
     QS_COLLECTION(QList, QString, alpn)
     QS_FIELD_OPT(QString, fingerprint)
@@ -86,14 +88,6 @@ class TlsSettings4Ray : public QSerializer
     QS_FIELD_OPT(QString, publicKey)
     QS_FIELD_OPT(QString, shortId)
     QS_FIELD_OPT(QString, spiderX)
-    QS_INTERNAL_MEMBER_SKIP_NULL(allowInsecure)
-    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(serverName)
-    QS_INTERNAL_MEMBER_SKIP_EMPTY(alpn)
-    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(fingerprint)
-    QS_INTERNAL_MEMBER_SKIP_NULL(show)
-    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(publicKey)
-    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(shortId)
-    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(spiderX)
 };
 
 class Header4Ray : public QSerializer
