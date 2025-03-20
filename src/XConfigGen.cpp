@@ -504,15 +504,24 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
         {QStringLiteral("trojan"),      QStringLiteral("trojan")},
         {QStringLiteral("shadowsocks"), QStringLiteral("ss")    }
     };
-
-    const auto &server = outbounds.settings->vnext.constFirst();
-
     QUrl url;
     url.setScheme(protocols.value(outbounds.protocol));
-    url.setHost(server.address);
-    url.setPort(server.port);
-    url.setUserInfo(server.users.constFirst().id.value());
     url.setFragment(alias);
+
+    if (outbounds.protocol == QStringLiteral("vless"))
+    {
+        const auto &server = outbounds.settings->vnext.constFirst();
+        url.setHost(server.address);
+        url.setPort(server.port);
+        url.setUserInfo(server.users.constFirst().id.value());
+    }
+    else
+    {
+        const auto &server = outbounds.settings->servers.constFirst();
+        url.setHost(server.address);
+        url.setPort(server.port);
+        url.setUserInfo(server.password.value());
+    }
 
     if (!outbounds.streamSettings.has_value())
     {
