@@ -370,7 +370,7 @@ XConfigGen::Xray::Outbounds4Ray XConfigGen::Xray::Deserialize(const QString &uri
 
     OutboundSettings4Ray outboundSettings;
 
-    if (matchedProtocol == QStringLiteral("vless") || matchedProtocol == QStringLiteral("vmess"))
+    if (matchedProtocol == QStringLiteral("vless"))
     {
         const auto encryption = query.hasQueryItem("encryption") ? query.queryItemValue("encryption") : QStringLiteral("auto");
         VnextItem4Ray vnext;
@@ -380,11 +380,10 @@ XConfigGen::Xray::Outbounds4Ray XConfigGen::Xray::Deserialize(const QString &uri
         user.id = uuid;
         if (encryption == QStringLiteral("none"))
         {
-            if (matchedProtocol == QStringLiteral("vless"))
-                user.encryption = encryption;
-            else
-                user.security = encryption;
+            user.encryption = encryption;
         }
+        if (query.hasQueryItem(QStringLiteral("flow")))
+            user.flow = query.queryItemValue(QStringLiteral("flow"));
         vnext.users = {user};
         outboundSettings.vnext = {vnext};
     }
