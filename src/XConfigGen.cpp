@@ -508,6 +508,7 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
     QString serverAddress;
 
     QUrl url;
+    QUrlQuery query;
     url.setScheme(protocols.value(outbounds.protocol));
     url.setFragment(alias);
 
@@ -518,6 +519,14 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
         url.setPort(server.port);
         url.setUserInfo(server.users.constFirst().id.value());
         serverAddress = server.address;
+        if (server.users.constFirst().encryption.has_value())
+        {
+            query.addQueryItem("encryption", server.users.constFirst().encryption.value());
+        }
+        if (server.users.constFirst().flow.has_value())
+        {
+            query.addQueryItem("flow", server.users.constFirst().flow.value());
+        }
     }
     else
     {
@@ -533,15 +542,14 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
         return url.toString();
     }
 
-    QUrlQuery query;
-
     const auto &streamSettings = outbounds.streamSettings.value();
     const auto network = streamSettings.network.value_or(QStringLiteral("tcp"));
 
     if (network == QStringLiteral("kcp") && streamSettings.kcpSettings.has_value())
     {
         const auto &kcpSettings = streamSettings.kcpSettings.value();
-        query.addQueryItem("seed", kcpSettings.seed.value_or(QString()));
+        if (kcpSettings.seed.has_value())
+            query.addQueryItem("seed", kcpSettings.seed.value());
         if (kcpSettings.header.has_value())
         {
             const auto &header = kcpSettings.header.value();
@@ -550,49 +558,46 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
                 query.addQueryItem("host", header.domain.value());
         }
     }
-    else if ((network == QStringLiteral("raw") || network == QStringLiteral("tcp")) && streamSettings.tcpSettings.has_value())
+    else if (streamSettings.tcpSettings.has_value() && (network == QStringLiteral("raw") || network == QStringLiteral("tcp")))
     {
         const auto &tcpSettings = streamSettings.tcpSettings.value();
         query.addQueryItem("headerType", tcpSettings.header.type);
     }
     else if (network == QStringLiteral("ws"))
     {
-        if (streamSettings.wsSettings.has_value())
-        {
-            const auto &wsSettings = streamSettings.wsSettings.value();
-            query.addQueryItem("path", wsSettings.path.value_or(QStringLiteral("/")));
-            query.addQueryItem("host", wsSettings.host.value_or(serverAddress));
-        }
+        const auto &wsSettings = streamSettings.wsSettings.value_or(WsSettings4Ray());
+        query.addQueryItem("path", wsSettings.path.value_or(QStringLiteral("/")));
+        query.addQueryItem("host", wsSettings.host.value_or(serverAddress));
     }
-    else if (network == QStringLiteral("quic") && streamSettings.quicSettings.has_value())
+    // else if (network == QStringLiteral("quic"))
+    // {
+    //     const auto &quicSettings = streamSettings.quicSettings.value_or(QuicSettings4Ray());
+    //     query.addQueryItem("quicSecurity", quicSettings.security.value_or(QStringLiteral("none")));
+    //     if (quicSettings.security != QStringLiteral("none"))
+    //     {
+    //         query.addQueryItem("key", quicSettings.key.value_or(QString()));
+    //     }
+    //     if (quicSettings.header.has_value())
+    //     {
+    //         const auto &header = quicSettings.header.value();
+    //         query.addQueryItem("headerType", header.type);
+    //     }
+    // }
+    else if (network == QStringLiteral("grpc"))
     {
-        const auto &quicSettings = streamSettings.quicSettings.value();
-        query.addQueryItem("quicSecurity", quicSettings.security.value_or(QStringLiteral("none")));
-        if (quicSettings.security != QStringLiteral("none"))
-        {
-            query.addQueryItem("key", quicSettings.key.value_or(QString()));
-        }
-        if (quicSettings.header.has_value())
-        {
-            const auto &header = quicSettings.header.value();
-            query.addQueryItem("headerType", header.type);
-        }
-    }
-    else if (network == QStringLiteral("grpc") && streamSettings.grpcSettings.has_value())
-    {
-        const auto &grpcSettings = streamSettings.grpcSettings.value();
+        const auto &grpcSettings = streamSettings.grpcSettings.value_or(GrpcSettings4Ray());
         query.addQueryItem("serviceName", grpcSettings.serviceName.value_or(serverAddress));
         query.addQueryItem("mode", grpcSettings.multiMode ? "multi" : "single");
     }
-    else if (network == QStringLiteral("httpupgrade") && streamSettings.httpupgradeSettings.has_value())
+    else if (network == QStringLiteral("httpupgrade"))
     {
-        const auto &httpUpgradeSettings = streamSettings.httpupgradeSettings.value();
+        const auto &httpUpgradeSettings = streamSettings.httpupgradeSettings.value_or(HttpUpgradeSettings4Ray());
         query.addQueryItem("path", httpUpgradeSettings.path.value_or(QStringLiteral("/")));
         query.addQueryItem("host", httpUpgradeSettings.host.value_or(serverAddress));
     }
-    else if (network == QStringLiteral("xhttp") && streamSettings.xhttpSettings.has_value())
+    else if (network == QStringLiteral("xhttp"))
     {
-        const auto &xhttpSettings = streamSettings.xhttpSettings.value();
+        const auto &xhttpSettings = streamSettings.xhttpSettings.value_or(XhttpSettings4Ray());
         query.addQueryItem("path", xhttpSettings.path.value_or(QStringLiteral("/")));
         query.addQueryItem("host", xhttpSettings.host.value_or(serverAddress));
         query.addQueryItem("mode", xhttpSettings.mode.value_or(QStringLiteral("http")));
@@ -602,20 +607,24 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
     query.addQueryItem("security", streamSettings.security.value_or(QStringLiteral("none")));
     if (streamSettings.security != QStringLiteral("none"))
     {
-        const auto &tlsSettings = streamSettings.tlsSettings.value();
-        query.addQueryItem("sni", tlsSettings.serverName.value_or(serverAddress));
-        if (tlsSettings.fingerprint.has_value())
-            query.addQueryItem("fp", tlsSettings.fingerprint.value());
-        if (streamSettings.security == QStringLiteral("reality"))
+        if (streamSettings.security == QStringLiteral("reality") && streamSettings.realitySettings.has_value())
         {
+            const auto &tlsSettings = streamSettings.realitySettings.value();
+            query.addQueryItem("sni", tlsSettings.serverName.value_or(serverAddress));
+            if (tlsSettings.fingerprint.has_value())
+                query.addQueryItem("fp", tlsSettings.fingerprint.value());
             query.addQueryItem("pbk", tlsSettings.publicKey.value());
             if (tlsSettings.shortId.has_value())
                 query.addQueryItem("sid", tlsSettings.shortId.value());
             if (tlsSettings.spiderX.has_value())
                 query.addQueryItem("spx", QUrl::toPercentEncoding(tlsSettings.spiderX.value()));
         }
-        else
+        else if (streamSettings.tlsSettings.has_value())
         {
+            const auto &tlsSettings = streamSettings.tlsSettings.value();
+            query.addQueryItem("sni", tlsSettings.serverName.value_or(serverAddress));
+            if (tlsSettings.fingerprint.has_value())
+                query.addQueryItem("fp", tlsSettings.fingerprint.value());
             if (!tlsSettings.alpn.isEmpty())
                 query.addQueryItem("alpn", tlsSettings.alpn.join(','));
             if (tlsSettings.allowInsecure.has_value())
@@ -684,9 +693,9 @@ const QString XConfigGen::Xray::VmessJsonSerialize(const Outbounds4Ray &outbound
             vmessUriRoot["host"] = settings.address;
         vmessUriRoot["path"] = wsSettings.path.value_or(QStringLiteral("/"));
     }
-    else if (streamSettings.grpcSettings.has_value() && network == QStringLiteral("grpc"))
+    else if (network == QStringLiteral("grpc"))
     {
-        const auto &grpcSettings = streamSettings.grpcSettings.value();
+        const auto &grpcSettings = streamSettings.grpcSettings.value_or(GrpcSettings4Ray());
         vmessUriRoot["path"] = grpcSettings.serviceName.value_or(settings.address);
     }
     const auto security = streamSettings.security.value_or(QStringLiteral("none"));

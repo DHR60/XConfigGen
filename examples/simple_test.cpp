@@ -268,6 +268,8 @@ int main()
     const QString uri = QStringLiteral("vless://e1685d45-f1f1-4edc-b0f4-f4ba1483ac89@31.59.111.17:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=www.aliyun.com&fp=chrome&pbk=111&sid=111&type=tcp&headerType=none#%E9%98%BF%E9%87%8C%E4%BA%91_%E5%9B%BD%E5%86%85_vless");
     QString alias, errMessage;
     const auto outbound = XConfigGen::Xray::Deserialize(uri, alias, errMessage);
+    const auto importUri = XConfigGen::Xray::Serialize(outbound, alias);
     qDebug().noquote() << uri << alias << errMessage;
     qDebug().noquote() << outbound.toRawJson();
+    qDebug() << importUri;
 }

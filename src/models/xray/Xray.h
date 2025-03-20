@@ -265,19 +265,20 @@ class ServersItem4Ray : public QSerializer
 {
     Q_GADGET
     QS_SERIALIZABLE
-    QS_FIELD(QString, email)
+    QS_FIELD_OPT(QString, email)
     QS_FIELD(QString, address)
     QS_FIELD_OPT(QString, method)
     QS_FIELD_OPT(bool, ota)
     QS_FIELD_OPT(QString, password)
     QS_FIELD(int, port)
     QS_FIELD_OPT(int, level)
-    QS_FIELD(QString, flow)
     QS_COLLECTION_OBJECTS(QList, SocksUsersItem4Ray, users)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(email)
     QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(method)
     QS_INTERNAL_MEMBER_SKIP_NULL(ota)
     QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(password)
     QS_INTERNAL_MEMBER_SKIP_NULL(level)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY(users)
 };
 
 class Mux4Ray : public QSerializer
