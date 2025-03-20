@@ -164,6 +164,11 @@ public:
         json.insert("extra", extra);
         return json;
     }
+    void fromJson(const QJsonValue &val) override
+    {
+        this->QSerializer::fromJson(val);
+        extra = val.toObject().value("extra").toObject();
+    }
 };
 
 class HttpSettings4Ray : public QSerializer
@@ -406,6 +411,54 @@ public:
         json.insert("hosts", hostsObject);
         json.insert("servers", serversArray);
         return json;
+    }
+    void fromJson(const QJsonValue &val) override
+    {
+        this->QSerializer::fromJson(val);
+        hosts.clear();
+        servers.clear();
+        auto obj = val.toObject();
+        for (auto it = obj.begin(); it != obj.end(); ++it)
+        {
+            if (it.key() == "hosts")
+            {
+                auto hostsObject = it.value().toObject();
+                for (auto it2 = hostsObject.begin(); it2 != hostsObject.end(); ++it2)
+                {
+                    if (it2.value().isArray())
+                    {
+                        const auto &array = it2.value().toArray();
+                        QStringList arr;
+                        for (const auto &item : array)
+                        {
+                            arr.append(item.toString());
+                        }
+                        hosts.insert(it2.key(), arr);
+                    }
+                    else
+                    {
+                        hosts.insert(it2.key(), it2.value().toString());
+                    }
+                }
+            }
+            else if (it.key() == "servers")
+            {
+                const auto &array = it.value().toArray();
+                for (const auto &item : array)
+                {
+                    if (item.isObject())
+                    {
+                        DnsServers4Ray server;
+                        server.fromJson(item);
+                        servers.append(QVariant::fromValue(server));
+                    }
+                    else
+                    {
+                        servers.append(item.toString());
+                    }
+                }
+            }
+        }
     }
 };
 

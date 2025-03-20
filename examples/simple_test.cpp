@@ -5,44 +5,39 @@ int main()
     XrayConfig xrayConfig;
     xrayConfig.log.loglevel = "warning";
     xrayConfig.dns.hosts = {
-        {"dns.alidns.com",                    QStringList{ "223.5.5.5", "223.6.6.6" }          },
-        { "cloudflare-dns.com",               QStringList{ "1.1.1.1", "1.0.0.1" }              },
-        { "1dot1dot1dot1.cloudflare-dns.com", QStringList{ "1.1.1.1", "1.0.0.1" }              },
-        { "one.one.one.one",                  QStringList{ "1.1.1.1", "1.0.0.1" }              },
-        { "dns.google",                       QStringList{ "8.8.8.8", "8.8.4.4" }              },
-        { "dns.quad9.net",                    QStringList{ "9.9.9.9", "149.112.112.112" }      },
-        { "dot.pub",                          QStringList{ "1.12.12.12", "120.53.53.53" }      },
-        { "dns.sb",                           "185.222.222.222"                                },
-        { "dns.umbrella.com",                 QStringList{ "208.67.220.220", "208.67.222.222" }},
-        { "dns.sse.cisco.com",                QStringList{ "208.67.220.220", "208.67.222.222" }}
+        {"dns.alidns.com",                   QStringList {"223.5.5.5", "223.6.6.6"}          },
+        {"cloudflare-dns.com",               QStringList {"1.1.1.1", "1.0.0.1"}              },
+        {"1dot1dot1dot1.cloudflare-dns.com", QStringList {"1.1.1.1", "1.0.0.1"}              },
+        {"one.one.one.one",                  QStringList {"1.1.1.1", "1.0.0.1"}              },
+        {"dns.google",                       QStringList {"8.8.8.8", "8.8.4.4"}              },
+        {"dns.quad9.net",                    QStringList {"9.9.9.9", "149.112.112.112"}      },
+        {"dot.pub",                          QStringList {"1.12.12.12", "120.53.53.53"}      },
+        {"dns.sb",                           "185.222.222.222"                               },
+        {"dns.umbrella.com",                 QStringList {"208.67.220.220", "208.67.222.222"}},
+        {"dns.sse.cisco.com",                QStringList {"208.67.220.220", "208.67.222.222"}}
     };
     DnsServers4Ray cfDns;
     cfDns.address = "https://1.1.1.1/dns-query";
     cfDns.domains = {
         "domain:bing.com",
-        "geosite:geolocation-!cn"
-    };
+        "geosite:geolocation-!cn"};
     cfDns.expectIPs = {
-        "geoip:!cn"
-    };
+        "geoip:!cn"};
     DnsServers4Ray localhostDns;
     localhostDns.address = "localhost";
     localhostDns.domains = {
         "domain:online-fix.me",
         "geosite:cn",
-        "geosite:category-games@cn"
-    };
+        "geosite:category-games@cn"};
     localhostDns.expectIPs = {
-        "geoip:cn"
-    };
+        "geoip:cn"};
     localhostDns.skipFallback = true;
     xrayConfig.dns.servers = {
         QVariant::fromValue(cfDns),
         QVariant::fromValue(localhostDns),
         "https://dns.google/dns-query",
         "https://dns.sb/dns-query",
-        "https://dns.sse.cisco.com/dns-query"
-    };
+        "https://dns.sse.cisco.com/dns-query"};
 
     Inbounds4Ray socks1Inbound;
     socks1Inbound.tag = "socks";
@@ -50,7 +45,7 @@ int main()
     socks1Inbound.listen = "127.0.0.1";
     socks1Inbound.port = 1080;
     socks1Inbound.sniffing.enabled = true;
-    socks1Inbound.sniffing.destOverride = { "http", "tls" };
+    socks1Inbound.sniffing.destOverride = {"http", "tls"};
     socks1Inbound.sniffing.routeOnly = false;
     socks1Inbound.settings.auth = "noauth";
     socks1Inbound.settings.udp = true;
@@ -62,7 +57,7 @@ int main()
     socks3Inbound.listen = "0.0.0.0";
     socks3Inbound.port = 1082;
     socks3Inbound.sniffing.enabled = true;
-    socks3Inbound.sniffing.destOverride = { "http", "tls" };
+    socks3Inbound.sniffing.destOverride = {"http", "tls"};
     socks3Inbound.sniffing.routeOnly = false;
     socks3Inbound.settings.auth = "noauth";
     socks3Inbound.settings.udp = true;
@@ -75,7 +70,7 @@ int main()
     apiInbound.protocol = "dokodemo-door";
     apiInbound.settings.address = "127.0.0.1";
 
-    xrayConfig.inbounds = { socks1Inbound, socks3Inbound, apiInbound };
+    xrayConfig.inbounds = {socks1Inbound, socks3Inbound, apiInbound};
 
     Outbounds4Ray proxyOutbound;
     proxyOutbound.tag = "proxy";
@@ -89,10 +84,10 @@ int main()
     proxyUser.security = "auto";
     proxyUser.encryption = "none";
     proxyUser.flow = "xtls-rprx-vision";
-    proxyVnext.users = { proxyUser };
+    proxyVnext.users = {proxyUser};
 
     OutboundSettings4Ray proxySettings;
-    proxySettings.vnext = { proxyVnext };
+    proxySettings.vnext = {proxyVnext};
 
     proxyOutbound.settings = proxySettings;
 
@@ -125,13 +120,13 @@ int main()
     blockOutbound.tag = "block";
     blockOutbound.protocol = "blackhole";
 
-    xrayConfig.outbounds = { proxyOutbound, directOutbound, blockOutbound };
+    xrayConfig.outbounds = {proxyOutbound, directOutbound, blockOutbound};
 
     xrayConfig.routing.domainStrategy = "IPIfNonMatch";
 
     RulesItem4Ray apiRule;
     apiRule.type = "field";
-    apiRule.inboundTag = { "api" };
+    apiRule.inboundTag = {"api"};
     apiRule.outboundTag = "api";
 
     RulesItem4Ray proxyDomainRule;
@@ -146,8 +141,7 @@ int main()
         "domain:dns.sb",
         "domain:dns.umbrella.com",
         "domain:dns.sse.cisco.com",
-        "geosite:cn"
-    };
+        "geosite:cn"};
     proxyDomainRule.outboundTag = "proxy";
 
     RulesItem4Ray blockQuicRule;
@@ -159,22 +153,19 @@ int main()
     RulesItem4Ray blockAdsRule;
     blockAdsRule.type = "field";
     blockAdsRule.domain = {
-        "geosite:category-ads-all"
-    };
+        "geosite:category-ads-all"};
     blockAdsRule.outboundTag = "block";
 
     RulesItem4Ray directPrivateIPRule;
     directPrivateIPRule.type = "field";
     directPrivateIPRule.ip = {
-        "geoip:private"
-    };
+        "geoip:private"};
     directPrivateIPRule.outboundTag = "direct";
 
     RulesItem4Ray directLocalDomainRule;
     directLocalDomainRule.type = "field";
     directLocalDomainRule.domain = {
-        "geosite:private"
-    };
+        "geosite:private"};
     directLocalDomainRule.outboundTag = "direct";
 
     RulesItem4Ray directCNDNSRule;
@@ -214,8 +205,7 @@ int main()
         "2400:7fc0:849e:200::8",
         "2404:c2c0:85d8:901::8",
         "117.50.60.30",
-        "52.80.60.30"
-    };
+        "52.80.60.30"};
     directCNDNSRule.outboundTag = "direct";
 
     RulesItem4Ray directCNDNSDomainRule;
@@ -225,22 +215,19 @@ int main()
         "domain:doh.pub",
         "domain:dot.pub",
         "domain:360.cn",
-        "domain:onedns.net"
-    };
+        "domain:onedns.net"};
     directCNDNSDomainRule.outboundTag = "direct";
 
     RulesItem4Ray directCNIPRule;
     directCNIPRule.type = "field";
     directCNIPRule.ip = {
-        "geoip:cn"
-    };
+        "geoip:cn"};
     directCNIPRule.outboundTag = "direct";
 
     RulesItem4Ray directCNDomainRule;
     directCNDomainRule.type = "field";
     directCNDomainRule.domain = {
-        "geosite:cn"
-    };
+        "geosite:cn"};
     directCNDomainRule.outboundTag = "direct";
 
     xrayConfig.routing.rules = {
@@ -253,8 +240,7 @@ int main()
         directCNDNSRule,
         directCNDNSDomainRule,
         directCNIPRule,
-        directCNDomainRule
-    };
+        directCNDomainRule};
 
     Metrics4Ray metrics;
     metrics.tag = "api";
@@ -266,7 +252,11 @@ int main()
     policy.system.statsOutboundDownlink = true;
 
     xrayConfig.policy = policy;
-    xrayConfig.stats = Stats4Ray{};
+    xrayConfig.stats = Stats4Ray {};
 
-    qDebug().noquote() << QJsonDocument(xrayConfig.toJson()).toJson();
+    const auto configJson = xrayConfig.toJson();
+    XrayConfig importXrayConfig;
+    importXrayConfig.fromJson(configJson);
+    const auto importConfig = importXrayConfig.toJson();
+    qDebug().noquote() << configJson << importConfig << (configJson == importConfig);
 }
