@@ -1,8 +1,8 @@
 #include "XConfigGen.h"
 
-int main()
+XConfigGen::Xray::XrayConfig generateConfig()
 {
-    XrayConfig xrayConfig;
+    XConfigGen::Xray::XrayConfig xrayConfig;
     xrayConfig.log.loglevel = "warning";
     xrayConfig.dns.hosts = {
         {"dns.alidns.com",                   QStringList {"223.5.5.5", "223.6.6.6"}          },
@@ -16,14 +16,14 @@ int main()
         {"dns.umbrella.com",                 QStringList {"208.67.220.220", "208.67.222.222"}},
         {"dns.sse.cisco.com",                QStringList {"208.67.220.220", "208.67.222.222"}}
     };
-    DnsServers4Ray cfDns;
+    XConfigGen::Xray::DnsServers4Ray cfDns;
     cfDns.address = "https://1.1.1.1/dns-query";
     cfDns.domains = {
         "domain:bing.com",
         "geosite:geolocation-!cn"};
     cfDns.expectIPs = {
         "geoip:!cn"};
-    DnsServers4Ray localhostDns;
+    XConfigGen::Xray::DnsServers4Ray localhostDns;
     localhostDns.address = "localhost";
     localhostDns.domains = {
         "domain:online-fix.me",
@@ -39,7 +39,7 @@ int main()
         "https://dns.sb/dns-query",
         "https://dns.sse.cisco.com/dns-query"};
 
-    Inbounds4Ray socks1Inbound;
+    XConfigGen::Xray::Inbounds4Ray socks1Inbound;
     socks1Inbound.tag = "socks";
     socks1Inbound.protocol = "socks";
     socks1Inbound.listen = "127.0.0.1";
@@ -51,7 +51,7 @@ int main()
     socks1Inbound.settings.udp = true;
     socks1Inbound.settings.allowTransparent = false;
 
-    Inbounds4Ray socks3Inbound;
+    XConfigGen::Xray::Inbounds4Ray socks3Inbound;
     socks3Inbound.tag = "socks3";
     socks3Inbound.protocol = "socks";
     socks3Inbound.listen = "0.0.0.0";
@@ -63,7 +63,7 @@ int main()
     socks3Inbound.settings.udp = true;
     socks3Inbound.settings.allowTransparent = false;
 
-    Inbounds4Ray apiInbound;
+    XConfigGen::Xray::Inbounds4Ray apiInbound;
     apiInbound.tag = "api";
     apiInbound.port = 1084;
     apiInbound.listen = "127.0.0.1";
@@ -72,29 +72,29 @@ int main()
 
     xrayConfig.inbounds = {socks1Inbound, socks3Inbound, apiInbound};
 
-    Outbounds4Ray proxyOutbound;
+    XConfigGen::Xray::Outbounds4Ray proxyOutbound;
     proxyOutbound.tag = "proxy";
     proxyOutbound.protocol = "vless";
 
-    VnextItem4Ray proxyVnext;
+    XConfigGen::Xray::VnextItem4Ray proxyVnext;
     proxyVnext.address = "proxy.com";
     proxyVnext.port = 443;
-    UsersItem4Ray proxyUser;
+    XConfigGen::Xray::UsersItem4Ray proxyUser;
     proxyUser.id = "uuid";
     proxyUser.security = "auto";
     proxyUser.encryption = "none";
     proxyUser.flow = "xtls-rprx-vision";
     proxyVnext.users = {proxyUser};
 
-    OutboundSettings4Ray proxySettings;
+    XConfigGen::Xray::OutboundSettings4Ray proxySettings;
     proxySettings.vnext = {proxyVnext};
 
     proxyOutbound.settings = proxySettings;
 
-    StreamSettings4Ray proxyStreamSettings;
+    XConfigGen::Xray::StreamSettings4Ray proxyStreamSettings;
     proxyStreamSettings.network = "raw";
     proxyStreamSettings.security = "reality";
-    TlsSettings4Ray proxyRealitySettings;
+    XConfigGen::Xray::TlsSettings4Ray proxyRealitySettings;
     proxyRealitySettings.serverName = "fbl.cn";
     proxyRealitySettings.fingerprint = "chrome";
     proxyRealitySettings.show = false;
@@ -105,18 +105,18 @@ int main()
 
     proxyOutbound.streamSettings = proxyStreamSettings;
 
-    Mux4Ray proxyMux;
+    XConfigGen::Xray::Mux4Ray proxyMux;
     proxyMux.enabled = true;
     proxyMux.concurrency = 8;
     proxyMux.xudpConcurrency = 8;
 
     proxyOutbound.mux = proxyMux;
 
-    Outbounds4Ray directOutbound;
+    XConfigGen::Xray::Outbounds4Ray directOutbound;
     directOutbound.tag = "direct";
     directOutbound.protocol = "freedom";
 
-    Outbounds4Ray blockOutbound;
+    XConfigGen::Xray::Outbounds4Ray blockOutbound;
     blockOutbound.tag = "block";
     blockOutbound.protocol = "blackhole";
 
@@ -124,12 +124,12 @@ int main()
 
     xrayConfig.routing.domainStrategy = "IPIfNonMatch";
 
-    RulesItem4Ray apiRule;
+    XConfigGen::Xray::RulesItem4Ray apiRule;
     apiRule.type = "field";
     apiRule.inboundTag = {"api"};
     apiRule.outboundTag = "api";
 
-    RulesItem4Ray proxyDomainRule;
+    XConfigGen::Xray::RulesItem4Ray proxyDomainRule;
     proxyDomainRule.type = "field";
     proxyDomainRule.domain = {
         "domain:googleapis.cn",
@@ -144,31 +144,31 @@ int main()
         "geosite:cn"};
     proxyDomainRule.outboundTag = "proxy";
 
-    RulesItem4Ray blockQuicRule;
+    XConfigGen::Xray::RulesItem4Ray blockQuicRule;
     blockQuicRule.type = "field";
     blockQuicRule.port = "443";
     blockQuicRule.network = "udp";
     blockQuicRule.outboundTag = "block";
 
-    RulesItem4Ray blockAdsRule;
+    XConfigGen::Xray::RulesItem4Ray blockAdsRule;
     blockAdsRule.type = "field";
     blockAdsRule.domain = {
         "geosite:category-ads-all"};
     blockAdsRule.outboundTag = "block";
 
-    RulesItem4Ray directPrivateIPRule;
+    XConfigGen::Xray::RulesItem4Ray directPrivateIPRule;
     directPrivateIPRule.type = "field";
     directPrivateIPRule.ip = {
         "geoip:private"};
     directPrivateIPRule.outboundTag = "direct";
 
-    RulesItem4Ray directLocalDomainRule;
+    XConfigGen::Xray::RulesItem4Ray directLocalDomainRule;
     directLocalDomainRule.type = "field";
     directLocalDomainRule.domain = {
         "geosite:private"};
     directLocalDomainRule.outboundTag = "direct";
 
-    RulesItem4Ray directCNDNSRule;
+    XConfigGen::Xray::RulesItem4Ray directCNDNSRule;
     directCNDNSRule.type = "field";
     directCNDNSRule.ip = {
         "223.5.5.5",
@@ -208,7 +208,7 @@ int main()
         "52.80.60.30"};
     directCNDNSRule.outboundTag = "direct";
 
-    RulesItem4Ray directCNDNSDomainRule;
+    XConfigGen::Xray::RulesItem4Ray directCNDNSDomainRule;
     directCNDNSDomainRule.type = "field";
     directCNDNSDomainRule.domain = {
         "domain:alidns.com",
@@ -218,13 +218,13 @@ int main()
         "domain:onedns.net"};
     directCNDNSDomainRule.outboundTag = "direct";
 
-    RulesItem4Ray directCNIPRule;
+    XConfigGen::Xray::RulesItem4Ray directCNIPRule;
     directCNIPRule.type = "field";
     directCNIPRule.ip = {
         "geoip:cn"};
     directCNIPRule.outboundTag = "direct";
 
-    RulesItem4Ray directCNDomainRule;
+    XConfigGen::Xray::RulesItem4Ray directCNDomainRule;
     directCNDomainRule.type = "field";
     directCNDomainRule.domain = {
         "geosite:cn"};
@@ -242,21 +242,32 @@ int main()
         directCNIPRule,
         directCNDomainRule};
 
-    Metrics4Ray metrics;
+    XConfigGen::Xray::Metrics4Ray metrics;
     metrics.tag = "api";
 
     xrayConfig.metrics = metrics;
 
-    Policy4Ray policy;
+    XConfigGen::Xray::Policy4Ray policy;
     policy.system.statsOutboundUplink = true;
     policy.system.statsOutboundDownlink = true;
 
     xrayConfig.policy = policy;
-    xrayConfig.stats = Stats4Ray {};
+    xrayConfig.stats = {};
 
-    const auto configJson = xrayConfig.toJson();
-    XrayConfig importXrayConfig;
+    return xrayConfig;
+}
+
+int main()
+{
+    const auto configJson = generateConfig().toJson();
+    XConfigGen::Xray::XrayConfig importXrayConfig;
     importXrayConfig.fromJson(configJson);
     const auto importConfig = importXrayConfig.toJson();
     qDebug().noquote() << configJson << importConfig << (configJson == importConfig);
+
+    const QString uri = QStringLiteral("vless://e1685d45-f1f1-4edc-b0f4-f4ba1483ac89@31.59.111.17:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=www.aliyun.com&fp=chrome&pbk=111&sid=111&type=tcp&headerType=none#%E9%98%BF%E9%87%8C%E4%BA%91_%E5%9B%BD%E5%86%85_vless");
+    QString alias, errMessage;
+    const auto outbound = XConfigGen::Xray::Deserialize(uri, alias, errMessage);
+    qDebug().noquote() << uri << alias << errMessage;
+    qDebug().noquote() << outbound.toRawJson();
 }

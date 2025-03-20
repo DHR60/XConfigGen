@@ -2,6 +2,12 @@
 
 #include <QSerializer>
 
+namespace XConfigGen
+{
+
+namespace Xray
+{
+
 class Log4Ray : public QSerializer
 {
     Q_GADGET
@@ -95,9 +101,11 @@ class Header4Ray : public QSerializer
     Q_GADGET
     QS_SERIALIZABLE
     QS_FIELD(QString, type)
-    QS_FIELD(QString, request)
-    QS_FIELD(QString, response)
+    QS_FIELD_OPT(QString, request)
+    QS_FIELD_OPT(QString, response)
     QS_FIELD_OPT(QString, domain)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(request)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(response)
     QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(domain)
 };
 
@@ -566,3 +574,7 @@ class XrayConfig : public QSerializer
     QS_INTERNAL_MEMBER_SKIP_NULL(stats)
     QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(remarks)
 };
+
+} // namespace Xray
+
+} // namespace XConfigGen
