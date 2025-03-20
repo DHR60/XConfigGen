@@ -504,6 +504,9 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
         {QStringLiteral("trojan"),      QStringLiteral("trojan")},
         {QStringLiteral("shadowsocks"), QStringLiteral("ss")    }
     };
+
+    QString serverAddress;
+
     QUrl url;
     url.setScheme(protocols.value(outbounds.protocol));
     url.setFragment(alias);
@@ -514,6 +517,7 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
         url.setHost(server.address);
         url.setPort(server.port);
         url.setUserInfo(server.users.constFirst().id.value());
+        serverAddress = server.address;
     }
     else
     {
@@ -521,6 +525,7 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
         url.setHost(server.address);
         url.setPort(server.port);
         url.setUserInfo(server.password.value());
+        serverAddress = server.address;
     }
 
     if (!outbounds.streamSettings.has_value())
@@ -556,7 +561,7 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
         {
             const auto &wsSettings = streamSettings.wsSettings.value();
             query.addQueryItem("path", wsSettings.path.value_or(QStringLiteral("/")));
-            query.addQueryItem("host", wsSettings.host.value_or(server.address));
+            query.addQueryItem("host", wsSettings.host.value_or(serverAddress));
         }
     }
     else if (network == QStringLiteral("quic") && streamSettings.quicSettings.has_value())
@@ -576,20 +581,20 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
     else if (network == QStringLiteral("grpc") && streamSettings.grpcSettings.has_value())
     {
         const auto &grpcSettings = streamSettings.grpcSettings.value();
-        query.addQueryItem("serviceName", grpcSettings.serviceName.value_or(server.address));
+        query.addQueryItem("serviceName", grpcSettings.serviceName.value_or(serverAddress));
         query.addQueryItem("mode", grpcSettings.multiMode ? "multi" : "single");
     }
     else if (network == QStringLiteral("httpupgrade") && streamSettings.httpupgradeSettings.has_value())
     {
         const auto &httpUpgradeSettings = streamSettings.httpupgradeSettings.value();
         query.addQueryItem("path", httpUpgradeSettings.path.value_or(QStringLiteral("/")));
-        query.addQueryItem("host", httpUpgradeSettings.host.value_or(server.address));
+        query.addQueryItem("host", httpUpgradeSettings.host.value_or(serverAddress));
     }
     else if (network == QStringLiteral("xhttp") && streamSettings.xhttpSettings.has_value())
     {
         const auto &xhttpSettings = streamSettings.xhttpSettings.value();
         query.addQueryItem("path", xhttpSettings.path.value_or(QStringLiteral("/")));
-        query.addQueryItem("host", xhttpSettings.host.value_or(server.address));
+        query.addQueryItem("host", xhttpSettings.host.value_or(serverAddress));
         query.addQueryItem("mode", xhttpSettings.mode.value_or(QStringLiteral("http")));
         query.addQueryItem("extra", QUrl::toPercentEncoding(QJsonDocument(xhttpSettings.extra).toJson()));
     }
@@ -598,7 +603,7 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
     if (streamSettings.security != QStringLiteral("none"))
     {
         const auto &tlsSettings = streamSettings.tlsSettings.value();
-        query.addQueryItem("sni", tlsSettings.serverName.value_or(server.address));
+        query.addQueryItem("sni", tlsSettings.serverName.value_or(serverAddress));
         if (tlsSettings.fingerprint.has_value())
             query.addQueryItem("fp", tlsSettings.fingerprint.value());
         if (streamSettings.security == QStringLiteral("reality"))
