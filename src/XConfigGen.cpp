@@ -525,7 +525,7 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
     const auto &streamSettings = outbounds.streamSettings.value();
     const auto network = streamSettings.network.value_or(QStringLiteral("tcp"));
 
-    if (network == QStringLiteral("kcp"))
+    if (network == QStringLiteral("kcp") && streamSettings.kcpSettings.has_value())
     {
         const auto &kcpSettings = streamSettings.kcpSettings.value();
         query.addQueryItem("seed", kcpSettings.seed.value_or(QString()));
@@ -537,18 +537,21 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
                 query.addQueryItem("host", header.domain.value());
         }
     }
-    else if (network == QStringLiteral("raw") || network == QStringLiteral("tcp"))
+    else if ((network == QStringLiteral("raw") || network == QStringLiteral("tcp")) && streamSettings.tcpSettings.has_value())
     {
         const auto &tcpSettings = streamSettings.tcpSettings.value();
         query.addQueryItem("headerType", tcpSettings.header.type);
     }
     else if (network == QStringLiteral("ws"))
     {
-        const auto &wsSettings = streamSettings.wsSettings.value();
-        query.addQueryItem("path", wsSettings.path.value_or(QStringLiteral("/")));
-        query.addQueryItem("host", wsSettings.host.value_or(server.address));
+        if (streamSettings.wsSettings.has_value())
+        {
+            const auto &wsSettings = streamSettings.wsSettings.value();
+            query.addQueryItem("path", wsSettings.path.value_or(QStringLiteral("/")));
+            query.addQueryItem("host", wsSettings.host.value_or(server.address));
+        }
     }
-    else if (network == QStringLiteral("quic"))
+    else if (network == QStringLiteral("quic") && streamSettings.quicSettings.has_value())
     {
         const auto &quicSettings = streamSettings.quicSettings.value();
         query.addQueryItem("quicSecurity", quicSettings.security.value_or(QStringLiteral("none")));
@@ -562,19 +565,19 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
             query.addQueryItem("headerType", header.type);
         }
     }
-    else if (network == QStringLiteral("grpc"))
+    else if (network == QStringLiteral("grpc") && streamSettings.grpcSettings.has_value())
     {
         const auto &grpcSettings = streamSettings.grpcSettings.value();
         query.addQueryItem("serviceName", grpcSettings.serviceName.value_or(server.address));
         query.addQueryItem("mode", grpcSettings.multiMode ? "multi" : "single");
     }
-    else if (network == QStringLiteral("httpupgrade"))
+    else if (network == QStringLiteral("httpupgrade") && streamSettings.httpupgradeSettings.has_value())
     {
         const auto &httpUpgradeSettings = streamSettings.httpupgradeSettings.value();
         query.addQueryItem("path", httpUpgradeSettings.path.value_or(QStringLiteral("/")));
         query.addQueryItem("host", httpUpgradeSettings.host.value_or(server.address));
     }
-    else if (network == QStringLiteral("xhttp"))
+    else if (network == QStringLiteral("xhttp") && streamSettings.xhttpSettings.has_value())
     {
         const auto &xhttpSettings = streamSettings.xhttpSettings.value();
         query.addQueryItem("path", xhttpSettings.path.value_or(QStringLiteral("/")));
