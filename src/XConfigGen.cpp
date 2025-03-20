@@ -425,10 +425,10 @@ XConfigGen::Xray::Outbounds4Ray XConfigGen::Xray::VmessJsonDeserialize(const QSt
 
     VnextItem4Ray vnext;
     vnext.address = vmessJson.value(QStringLiteral("add")).toString();
-    vnext.port = vmessJson.value(QStringLiteral("port")).toInt();
+    vnext.port = vmessJson.value(QStringLiteral("port")).toString().toInt();
     UsersItem4Ray user;
     user.id = vmessJson.value(QStringLiteral("id")).toString();
-    user.alterId = vmessJson.value(QStringLiteral("aid")).toInt();
+    user.alterId = vmessJson.value(QStringLiteral("aid")).toString().toInt();
     user.security = vmessJson.value(QStringLiteral("scy")).toString(QStringLiteral("auto"));
     vnext.users = {user};
 
