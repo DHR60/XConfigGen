@@ -94,7 +94,7 @@ class TlsSettings4Ray : public QSerializer
     QS_FIELD_OPT(QString, publicKey)
     QS_FIELD_OPT(QString, shortId)
     QS_FIELD_OPT(QString, spiderX)
-    QS_FIELD_OPT(bool, enableSessionResumptionCB)
+    QS_FIELD_OPT(bool, enableSessionResumption)
 };
 
 class Header4Ray : public QSerializer
