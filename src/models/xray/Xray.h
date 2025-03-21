@@ -94,6 +94,7 @@ class TlsSettings4Ray : public QSerializer
     QS_FIELD_OPT(QString, publicKey)
     QS_FIELD_OPT(QString, shortId)
     QS_FIELD_OPT(QString, spiderX)
+    QS_FIELD_OPT(bool, enableSessionResumptionCB)
 };
 
 class Header4Ray : public QSerializer
@@ -136,14 +137,14 @@ class WsSettings4Ray : public QSerializer
 {
     Q_GADGET
     QS_SERIALIZABLE
+    QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
     QS_FIELD_OPT(QString, path)
     QS_FIELD_OPT(QString, host)
     // 仅客户端，自定义 HTTP 头，一个键值对，每个键表示一个 HTTP 头的名称，对应的值是字符串。
     // v2rayN 使用 Headers4Ray { Host; UserAgent}
     QS_QT_DICT(QMap, QString, QString, headers)
-    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(path)
-    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(host)
-    QS_INTERNAL_MEMBER_SKIP_EMPTY(headers)
+    QS_FIELD_OPT(bool, acceptProxyProtocol)
+    QS_FIELD_OPT(int, heartbeatPeriod)
 };
 
 class HttpUpgradeSettings4Ray : public QSerializer
@@ -186,6 +187,7 @@ class HttpSettings4Ray : public QSerializer
     QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
     QS_FIELD_OPT(QString, path)
     QS_COLLECTION(QList, QString, host)
+    QS_FIELD_OPT(QString, method)
 };
 
 class QuicSettings4Ray : public QSerializer
@@ -212,12 +214,42 @@ class GrpcSettings4Ray : public QSerializer
     QS_FIELD_OPT(int, initial_windows_size)
 };
 
+class CustomSockopt4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD(QString, type)
+    QS_FIELD_OPT(QString, level)
+    QS_FIELD_OPT(QString, opt)
+    QS_FIELD_OPT(QString, value)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(level)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(opt)
+    QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(value)
+};
+
 class Sockopt4Ray : public QSerializer
 {
     Q_GADGET
     QS_SERIALIZABLE
     QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
+    QS_FIELD_OPT(int, mark)
+    QS_FIELD_OPT(int, tcpMaxSeg)
+    QS_FIELD_OPT(bool, tcpFastOpen)
+    QS_FIELD_OPT(QString, tproxy)
+    QS_FIELD_OPT(QString, domainStrategy)
     QS_FIELD_OPT(QString, dialerProxy)
+    QS_FIELD_OPT(bool, acceptProxyProtocol)
+    QS_FIELD_OPT(int, tcpKeepAliveInterval)
+    QS_FIELD_OPT(int, tcpKeepAliveIdle)
+    QS_FIELD_OPT(int, tcpUserTimeout)
+    QS_FIELD_OPT(QString, tcpcongestion)
+    QS_FIELD_OPT(QString, interface)
+    QS_FIELD_OPT(bool, V6Only)
+    QS_FIELD_OPT(int, tcpWindowClamp)
+    QS_FIELD_OPT(bool, tcpMptcp)
+    QS_FIELD_OPT(bool, tcpNoDelay)
+    QS_FIELD_OPT(QString, addressPortStrategy)
+    QS_COLLECTION_OBJECTS(QList, CustomSockopt4Ray, customSockopt)
 };
 
 class StreamSettings4Ray : public QSerializer

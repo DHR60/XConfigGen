@@ -260,8 +260,7 @@ XConfigGen::Xray::XrayConfig generateConfig()
 int main()
 {
     const auto configJson = generateConfig().toJson();
-    XConfigGen::Xray::XrayConfig importXrayConfig;
-    importXrayConfig.fromJson(configJson);
+    const auto importXrayConfig(QSerializer::fromJson<XConfigGen::Xray::XrayConfig>(configJson));
     const auto importConfig = importXrayConfig.toJson();
     qDebug().noquote() << configJson << importConfig << (configJson == importConfig);
 
