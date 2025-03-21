@@ -154,6 +154,7 @@ class HttpUpgradeSettings4Ray : public QSerializer
     QS_INTERNAL_SKIP_EMPTY_AND_NULL_LITERALS
     QS_FIELD_OPT(QString, path)
     QS_FIELD_OPT(QString, host)
+    QS_OBJECT_OPT(Header4Ray, header)
 };
 
 class XhttpSettings4Ray : public QSerializer
