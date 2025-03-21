@@ -243,13 +243,31 @@ class Sockopt4Ray : public QSerializer
     QS_FIELD_OPT(int, tcpKeepAliveIdle)
     QS_FIELD_OPT(int, tcpUserTimeout)
     QS_FIELD_OPT(QString, tcpcongestion)
-    QS_FIELD_OPT(QString, interface)
+    // 编译 moc 报错：意外的标记“struct”。是否忘记了“;”? “struct”: 缺少标记名 语法错误:“=”
+    // QS_FIELD_OPT(QString, interface)
     QS_FIELD_OPT(bool, V6Only)
     QS_FIELD_OPT(int, tcpWindowClamp)
     QS_FIELD_OPT(bool, tcpMptcp)
     QS_FIELD_OPT(bool, tcpNoDelay)
     QS_FIELD_OPT(QString, addressPortStrategy)
     QS_COLLECTION_OBJECTS(QList, CustomSockopt4Ray, customSockopt)
+
+public:
+    std::optional<QString> netInterface;
+    QJsonObject toJson() const override
+    {
+        auto json = this->QSerializer::toJson();
+        if (netInterface.has_value())
+        {
+            json.insert("interface", netInterface.value());
+        }
+        return json;
+    }
+    void fromJson(const QJsonValue &val) override
+    {
+        this->QSerializer::fromJson(val);
+        netInterface = val.toObject().value("interface").toString();
+    }
 };
 
 class StreamSettings4Ray : public QSerializer
