@@ -471,6 +471,14 @@ public:
     }
 };
 
+class FakeDNS4Ray : public QSerializer
+{
+    Q_GADGET
+    QS_SERIALIZABLE
+    QS_FIELD_DEFAULT(QString, ipPool, QStringLiteral("198.18.0.0/16"))
+    QS_FIELD_DEFAULT(int, poolSize, 65535)
+};
+
 // routing
 
 class RulesItem4Ray : public QSerializer
@@ -563,6 +571,7 @@ class XrayConfig : public QSerializer
     QS_SERIALIZABLE
     QS_OBJECT(Log4Ray, log)
     QS_OBJECT(Dns4Ray, dns)
+    QS_OBJECT_OPT(FakeDNS4Ray, fakeDNS)
     QS_COLLECTION_OBJECTS(QList, Inbounds4Ray, inbounds)
     QS_COLLECTION_OBJECTS(QList, Outbounds4Ray, outbounds)
     QS_OBJECT(Routing4Ray, routing)
@@ -570,10 +579,58 @@ class XrayConfig : public QSerializer
     QS_OBJECT_OPT(Policy4Ray, policy)
     QS_OBJECT_OPT(Stats4Ray, stats)
     QS_FIELD_OPT(QString, remarks)
+    QS_INTERNAL_MEMBER_SKIP_NULL(fakeDNS)
     QS_INTERNAL_MEMBER_SKIP_NULL(metrics)
     QS_INTERNAL_MEMBER_SKIP_NULL(policy)
     QS_INTERNAL_MEMBER_SKIP_NULL(stats)
     QS_INTERNAL_MEMBER_SKIP_EMPTY_AND_NULL_LITERALS(remarks)
+
+public:
+    QList<FakeDNS4Ray> fakeDNSList;
+    QJsonObject toJson() const override
+    {
+        auto json = this->QSerializer::toJson();
+        if (!fakeDNSList.isEmpty())
+        {
+            if (fakeDNS.has_value())
+                qWarning() << "fakeDNSList has been set, fakeDNS will be overridden.";
+            QJsonArray fakeDNSArray;
+            for (const auto &item : fakeDNSList)
+            {
+                fakeDNSArray.append(item.toJson());
+            }
+            json.insert("fakedns", fakeDNSArray);
+        }
+        return json;
+    }
+    void fromJson(const QJsonValue &val) override
+    {
+        this->QSerializer::fromJson(val);
+        if (val.isObject())
+        {
+            auto obj = val.toObject();
+            if (obj.contains("fakedns"))
+            {
+                const auto fakednsItem = obj.value("fakedns");
+                if (fakednsItem.isArray())
+                {
+                    fakeDNSList.clear();
+                    auto fakeDNSArray = fakednsItem.toArray();
+                    for (const auto &item : std::as_const(fakeDNSArray))
+                    {
+                        FakeDNS4Ray fakeDNS;
+                        fakeDNS.fromJson(item);
+                        fakeDNSList.append(fakeDNS);
+                    }
+                }
+                else if (fakednsItem.isObject())
+                {
+                    FakeDNS4Ray fakeDNS;
+                    fakeDNS.fromJson(fakednsItem);
+                }
+            }
+        }
+    }
 };
 
 } // namespace Xray
