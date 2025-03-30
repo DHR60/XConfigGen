@@ -37,3 +37,4 @@ out/
 #oss code
 .vscode
 .cache
+.qt

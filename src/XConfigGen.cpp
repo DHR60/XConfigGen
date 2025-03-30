@@ -76,14 +76,21 @@ QStringList XConfigGen::Common::SplitLines(const QString &_string)
 
 const QString XConfigGen::Common::GenerateRandomString(int len)
 {
-    const QString possibleCharacters("abcdefghijklmnopqrstuvwxyz");
+    const QString possibleCharacters(QStringLiteral("abcdefghijklmnopqrstuvwxyz"));
+    const int max = possibleCharacters.length();
+    QRandomGenerator *generator = QRandomGenerator::system();
     QString randomString;
 
+    if (len <= 0)
+    {
+        return randomString;
+    }
+
+    randomString.reserve(len);
     for (int i = 0; i < len; ++i)
     {
-        uint rand = QRandomGenerator::system()->generate();
-        uint max = static_cast<uint>(possibleCharacters.length());
-        QChar nextChar = possibleCharacters[rand % max];
+        int index = generator->bounded(max);
+        QChar nextChar = possibleCharacters[index];
         randomString.append(nextChar);
     }
 
@@ -634,7 +641,7 @@ const QString XConfigGen::Xray::Serialize(const Outbounds4Ray &outbounds, const 
 
     url.setQuery(query);
 
-    return url.toString();
+    return url.toEncoded();
 }
 
 const QString XConfigGen::Xray::VmessJsonSerialize(const Outbounds4Ray &outbounds, const QString &alias)
