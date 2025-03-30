@@ -100,6 +100,7 @@ const QString XConfigGen::Common::GenerateRandomString(int len)
 XConfigGen::Xray::Outbounds4Ray XConfigGen::Xray::Deserialize(const QString &uri, QString &alias, QString &errMessage, const QString &tag)
 {
     Outbounds4Ray outbound;
+    outbound.tag = tag;
 
     const QMap<QString, QString> protocols {
         {QStringLiteral("vless"),  QStringLiteral("vless")      },
@@ -492,6 +493,7 @@ XConfigGen::Xray::Outbounds4Ray XConfigGen::Xray::VmessJsonDeserialize(const QSt
     streamSettings.fromJson(streamSettingsJson);
 
     Outbounds4Ray outbound;
+    outbound.tag = tag;
     outbound.protocol = QStringLiteral("vmess");
     outbound.streamSettings = streamSettings;
     OutboundSettings4Ray outboundSettings;
