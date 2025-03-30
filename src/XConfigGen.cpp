@@ -659,5 +659,5 @@ const QString XConfigGen::Xray::VmessJsonSerialize(const Outbounds4Ray &outbound
         if (!tlsSettings.alpn.isEmpty())
             vmessUriRoot["alpn"] = tlsSettings.alpn.join(',');
     }
-    return QStringLiteral("vmess://").append(Common::Base64Encode(Common::JsonToString(vmessUriRoot, QJsonDocument::Compact)));
+    return QStringLiteral("vmess://").append(Common::Base64Encode(QJsonDocument(vmessUriRoot).toJson(QJsonDocument::Compact)));
 }
