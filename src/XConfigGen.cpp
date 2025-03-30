@@ -38,65 +38,6 @@ std::optional<QString> XConfigGen::Common::Base64Decode(const QString &string)
     return std::nullopt;
 }
 
-QString XConfigGen::Common::JsonToString(const QJsonObject &json, QJsonDocument::JsonFormat format)
-{
-    QJsonDocument doc;
-    doc.setObject(json);
-    return doc.toJson(format);
-}
-
-QString XConfigGen::Common::JsonToString(const QJsonArray &array, QJsonDocument::JsonFormat format)
-{
-    QJsonDocument doc;
-    doc.setArray(array);
-    return doc.toJson(format);
-}
-
-QString XConfigGen::Common::VerifyJsonString(const QString &source)
-{
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson(source.toUtf8(), &error);
-    Q_UNUSED(doc)
-
-    if (error.error == QJsonParseError::NoError)
-    {
-        return {};
-    }
-    else
-    {
-        return error.errorString();
-    }
-}
-
-QStringList XConfigGen::Common::SplitLines(const QString &_string)
-{
-    static const QRegularExpression regex("[\r\n]");
-    return _string.split(regex, Qt::SplitBehaviorFlags::SkipEmptyParts);
-}
-
-const QString XConfigGen::Common::GenerateRandomString(int len)
-{
-    const QString possibleCharacters(QStringLiteral("abcdefghijklmnopqrstuvwxyz"));
-    const int max = possibleCharacters.length();
-    QRandomGenerator *generator = QRandomGenerator::system();
-    QString randomString;
-
-    if (len <= 0)
-    {
-        return randomString;
-    }
-
-    randomString.reserve(len);
-    for (int i = 0; i < len; ++i)
-    {
-        int index = generator->bounded(max);
-        QChar nextChar = possibleCharacters[index];
-        randomString.append(nextChar);
-    }
-
-    return randomString;
-}
-
 XConfigGen::Xray::Outbounds4Ray XConfigGen::Xray::Deserialize(const QString &uri, QString &alias, QString &errMessage, const QString &tag)
 {
     Outbounds4Ray outbound;
